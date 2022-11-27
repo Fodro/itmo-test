@@ -22,7 +22,7 @@ class Book
     private ?int $publishing_year = null;
 
     #[ORM\Column]
-    private ?int $ISBN = null;
+    private ?string $ISBN = null;
 
     #[ORM\Column]
     private ?int $pages_count = null;
@@ -64,12 +64,12 @@ class Book
         return $this;
     }
 
-    public function getISBN(): ?int
+    public function getISBN(): ?string
     {
         return $this->ISBN;
     }
 
-    public function setISBN(int $ISBN): self
+    public function setISBN(string $ISBN): self
     {
         $this->ISBN = $ISBN;
 
