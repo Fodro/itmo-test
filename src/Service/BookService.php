@@ -1,6 +1,7 @@
 <?php
 namespace App\Service;
 use App\Entity\Book;
+use App\Entity\Author;
 use App\Service\BasicService;
 use App\Interfaces\Service;
 
@@ -22,6 +23,14 @@ class BookService extends BasicService implements Service{
 		$book->setPublishingYear($bookObject->publishing_year);
 		$book->setISBN($bookObject->_isbn);
 		$book->setPagesCount($bookObject->pages_count);
+		$authorIds = $bookObject->authors;
+		foreach ($authorIds as $currentId){
+			$author = $this->entityManager->getRepository(Author::class)->find($currentId);
+			if (!$author){
+				return null;
+			}
+			$book->addAuthor($author);
+		}
 		if ($this->validateObj($book))
 		{
 			$this->entityManager->persist($book);
@@ -40,6 +49,20 @@ class BookService extends BasicService implements Service{
 		$book->setPublishingYear(property_exists($updateObject, 'publishing_year') ? $updateObject->publishing_year : $book->getPublishingYear());
 		$book->setISBN(property_exists($updateObject, '_isbn') ? $updateObject->_isbn : $book->getISBN());
 		$book->setPagesCount(property_exists($updateObject, 'pages_count') ? $updateObject->pages_count : $book->getPagesCount());
+		if (property_exists($updateObject, 'authors')){
+			$existingAuthors = $book->getAuthors();
+			foreach ($existingAuthors as $currentAuthor){
+				$book->removeAuthor($currentAuthor);
+			}
+			$authorIds = $updateObject->authors;
+			foreach ($authorIds as $currentId){
+				$author = $this->entityManager->getRepository(Author::class)->find($currentId);
+				if (!$author){
+					return False;
+				}
+				$book->addAuthor($author);
+			}
+		}
 		if (!$this->validateObj($book)) {
 			return False;
 		}

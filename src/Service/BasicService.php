@@ -13,7 +13,7 @@ class BasicService {
 		$this->entityManager = $doctrine->getManager();
 	}
 	protected function serializeObj($obj): string | null{
-		if (!$obj){
+		if ($obj === null){
 			return null;
 		}
 		return $this->serializer->serialize($obj, 'json');

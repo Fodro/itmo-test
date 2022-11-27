@@ -13,20 +13,20 @@ class AuthorController extends AbstractController implements Controller {
 	function __construct(AuthorService $authorService) {
 		$this->authorService = $authorService;
 	}
-	#[Route('/all', name: "all")]
+	#[Route('/', name: "all", methods: ['GET'])]
 	public function getAll(): Response {
 		$authors = $this->authorService->fetchAll();
 		return new Response($authors);
 	}
-	#[Route('/by-id/{id}', name: "by_id", methods: ['GET'], requirements:['id' => '\d+'])]
+	#[Route('/{id}', name: "by_id", methods: ['GET'], requirements:['id' => '\d+'])]
 	public function getById(int $id): Response {
 		$author = $this->authorService->fetchById($id);
-		if (!$author === null) {
+		if ($author === null) {
 			return new Response("Author with id {$id} not found", 404);
 		}
 		return new Response($author);
 	}
-	#[Route('/new', name: 'new', methods: ['POST'])]
+	#[Route('/create', name: 'new', methods: ['POST'])]
 	public function create(Request $request): Response {
 		$result = $this->authorService->add($request->getContent());
 		if (!$result) {

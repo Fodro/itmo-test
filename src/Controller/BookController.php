@@ -12,12 +12,12 @@ class BookController extends AbstractController implements Controller {
 	function __construct(BookService $bookService) {
 		$this->bookService = $bookService;
 	}
-	#[Route('/all', name: "all")]
+	#[Route('/', name: "all", methods: ['GET'])]
 	public function getAll(): Response {
 		$books = $this->bookService->fetchAll();
 		return new Response($books);
 	}
-	#[Route('/by-id/{id}', name: "by_id", methods: ['GET'], requirements:['id' => '\d+'])]
+	#[Route('/{id}', name: "by_id", methods: ['GET'], requirements:['id' => '\d+'])]
 	public function getById(int $id): Response {
 		$book = $this->bookService->fetchById($id);
 		if (!$book) {
@@ -25,7 +25,7 @@ class BookController extends AbstractController implements Controller {
 		}
 		return new Response($book);
 	}
-	#[Route('/new', name: 'new', methods: ['POST'])]
+	#[Route('/create', name: 'new', methods: ['POST'])]
 	public function create(Request $request): Response {
 		$result = $this->bookService->add($request->getContent());
 		if (!$result) {
