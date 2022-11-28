@@ -17,8 +17,20 @@ class BookService extends BasicService implements Service{
 		return $bookJson;
 	}
 	public function add(string $jsonBody): int | null {
-		$book = new Book();
 		$bookObject = json_decode($jsonBody);
+		$existingBookbyISBN = $this->doctrine->getRepository(Book::class)->findOneBy(
+			array('title' => $bookObject->title, 'ISBN' => $bookObject->_isbn)
+		);
+		if ($existingBookbyISBN !== null) {
+			return null;
+		}
+		$existingBookbyYear = $this->doctrine->getRepository(Book::class)->findOneBy(
+			array('title' => $bookObject->title, 'publishing_year' => $bookObject->publishing_year)
+		);
+		if ($existingBookbyYear !== null) {
+			return null;
+		}
+		$book = new Book();
 		$book->setTitle($bookObject->title);
 		$book->setPublishingYear($bookObject->publishing_year);
 		$book->setISBN($bookObject->_isbn);
@@ -62,6 +74,18 @@ class BookService extends BasicService implements Service{
 				}
 				$book->addAuthor($author);
 			}
+		}
+		$existingBookbyISBN = $this->doctrine->getRepository(Book::class)->findOneBy(
+			array('title' => $book->getTitle(), 'ISBN' => $book->getISBN())
+		);
+		if ($existingBookbyISBN !== null and $existingBookbyISBN->getId() !== $book->getId()) {
+			return False;
+		}
+		$existingBookbyYear = $this->doctrine->getRepository(Book::class)->findOneBy(
+			array('title' => $book->getTitle(), 'publishing_year' => $book->getPublishingYear())
+		);
+		if ($existingBookbyYear !== null and $existingBookbyYear->getId() !== $book->getId()) {
+			return False;
 		}
 		if (!$this->validateObj($book)) {
 			return False;

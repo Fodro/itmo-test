@@ -17,8 +17,13 @@ class AuthorService extends BasicService implements Service{
 		return $authorJson;
 	}
 	public function add(string $jsonBody): int | null {
-		$author = new Author();
 		$authorObject = json_decode($jsonBody);
+		$existingAuthor = $this->doctrine->getRepository(Author::class)->findOneBy(
+			array('name' => $authorObject->name, 'surname' => $authorObject->surname, 'patronymic' => $authorObject->patronymic));
+		if ($existingAuthor !== null){
+			return null;
+		}
+		$author = new Author();
 		$author->setName($authorObject->name);
 		$author->setSurname($authorObject->surname);
 		$author->setPatronymic($authorObject->patronymic);
@@ -60,6 +65,11 @@ class AuthorService extends BasicService implements Service{
 				}
 				$author->addBook($book);
 			}
+		}
+		$existingAuthor = $this->doctrine->getRepository(Author::class)->findOneBy(
+			array('name' => $author->getName(), 'surname' => $author->getSurname(), 'patronymic' => $author->getPatronymic()));
+		if ($existingAuthor !== null and $existingAuthor->getId() !== $author->getId()){
+			return False;
 		}
 		if(!$this->validateObj($author)){
 			return False;
