@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\BookService;
 use App\Interfaces\Controller;
+use App\Service\FileService;
 use JMS\Serializer\SerializerBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -53,5 +54,34 @@ class BookController extends AbstractController implements Controller  {
 			return new Response("Deleted book with id {$id}");
 		}
 		return new Response("Book with id {$id} not found", 404);
+	}
+	#[Route('/{id}/image/upload', name: 'upload', methods: ['POST'], requirements:['id' => '\d+'])]
+	public function uploadImage(int $id, ManagerRegistry $doctrine, FileService $fileService): Response {
+		$serializer = SerializerBuilder::create()->build();
+		if ($_FILES["file"]["error"] > 0)
+		{
+			return new Response("Error: " . $_FILES["file"]["error"], 400);
+		}
+		else
+		{
+			$content = $_FILES["file"]["tmp_name"];
+			$name = $_FILES["file"]["name"];
+			$result = $fileService->write($content, $id, $doctrine, $_SERVER['DOCUMENT_ROOT'], $name, $serializer);
+			if ($result) {
+				return new Response($result);
+			}
+			else {
+				return new Response("Error", 400);
+			}
+		}
+	}
+	#[Route('/{id}/image', name: 'get_image', methods: ['GET'], requirements:['id' => '\d+'])]
+	public function getImage(int $id, ManagerRegistry $doctrine, FileService $fileService): Response {
+		$serializer = SerializerBuilder::create()->build();
+		$result = $fileService->fetch($id, $doctrine, $serializer);
+		if(!$result) {
+			return new Response("Error", 400);
+		}
+		return new Response($result);
 	}
 }

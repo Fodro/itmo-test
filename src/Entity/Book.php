@@ -30,6 +30,9 @@ class Book
     #[ORM\ManyToMany(targetEntity: Author::class, mappedBy: 'books')]
     private Collection $authors;
 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Image $image = null;
+
     public function __construct()
     {
         $this->authors = new ArrayCollection();
@@ -111,6 +114,18 @@ class Book
         if ($this->authors->removeElement($author)) {
             $author->removeBook($this);
         }
+
+        return $this;
+    }
+
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    public function setImage(?Image $image): self
+    {
+        $this->image = $image;
 
         return $this;
     }
